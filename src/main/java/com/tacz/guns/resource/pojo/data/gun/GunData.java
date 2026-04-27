@@ -114,6 +114,9 @@ public class GunData {
     @SerializedName("builtin_attachments")
     private Map<AttachmentType, ResourceLocation> builtInAttachments = Maps.newHashMap();
 
+    @SerializedName("keychain_attachment")
+    private KeychainAttachment keychainAttachment = new KeychainAttachment();
+
     @SerializedName("script")
     private ResourceLocation script = null;
 
@@ -270,6 +273,10 @@ public class GunData {
 
     public Map<AttachmentType, ResourceLocation> getBuiltInAttachments() {
         return builtInAttachments;
+    }
+
+    public KeychainAttachment getKeychainAttachment() {
+        return keychainAttachment == null ? new KeychainAttachment() : keychainAttachment;
     }
 
     public Map<ResourceLocation, AttachmentData> getExclusiveAttachments() {

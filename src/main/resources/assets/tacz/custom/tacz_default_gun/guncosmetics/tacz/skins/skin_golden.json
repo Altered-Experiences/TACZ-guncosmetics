@@ -1,0 +1,14 @@
+{
+  "id": "tacz:skin_golden",
+  "display_name": "tacz.attachment.skin_golden.name",
+  "type": "specific",
+  "rarity": "epic",
+  "target_gun": "tacz:deagle",
+  "texture": "gun/uv/deagle_50_golden",
+  "description": [
+    "tacz.attachment.skin_golden.desc"
+  ],
+  "damage": {
+    "multiplier": 1.03
+  }
+}

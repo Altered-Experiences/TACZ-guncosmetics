@@ -9,6 +9,7 @@ import com.tacz.guns.api.item.builder.AttachmentItemBuilder;
 import com.tacz.guns.api.item.gun.FireMode;
 import com.tacz.guns.client.resource.GunDisplayInstance;
 import com.tacz.guns.client.resource.index.ClientAttachmentIndex;
+import com.tacz.guns.cosmetic.data.CosmeticNBTHelper;
 import com.tacz.guns.resource.index.CommonGunIndex;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -306,10 +307,17 @@ public interface GunItemDataAccessor extends IGun {
             return;
         }
         CompoundTag nbt = gun.getOrCreateTag();
-        String key = GUN_ATTACHMENT_BASE + iAttachment.getType(attachment).name();
+        AttachmentType type = iAttachment.getType(attachment);
+        ResourceLocation attachmentId = iAttachment.getAttachmentId(attachment);
+        String key = GUN_ATTACHMENT_BASE + type.name();
         CompoundTag attachmentTag = new CompoundTag();
         attachment.save(attachmentTag);
         nbt.put(key, attachmentTag);
+        if (type == AttachmentType.SKIN) {
+            CosmeticNBTHelper.setSkinId(gun, attachmentId);
+        } else if (type == AttachmentType.KEYCHAIN) {
+            CosmeticNBTHelper.setKeychainId(gun, attachmentId);
+        }
     }
 
     @Override
@@ -322,6 +330,11 @@ public interface GunItemDataAccessor extends IGun {
         CompoundTag attachmentTag = new CompoundTag();
         ItemStack.EMPTY.save(attachmentTag);
         nbt.put(key, attachmentTag);
+        if (type == AttachmentType.SKIN) {
+            CosmeticNBTHelper.setSkinId(gun, null);
+        } else if (type == AttachmentType.KEYCHAIN) {
+            CosmeticNBTHelper.setKeychainId(gun, null);
+        }
     }
 
     @Override

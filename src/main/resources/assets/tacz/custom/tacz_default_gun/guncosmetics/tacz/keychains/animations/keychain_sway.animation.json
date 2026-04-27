@@ -1,0 +1,23 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.keychain.sway": {
+      "loop": true,
+      "animation_length": 2.4,
+      "bones": {
+        "root": {
+          "rotation": [
+            "Math.sin(query.anim_time * 150) * 3",
+            0,
+            "Math.sin(query.anim_time * 210) * 7"
+          ],
+          "position": [
+            0,
+            "Math.abs(Math.sin(query.anim_time * 150)) * 0.08",
+            0
+          ]
+        }
+      }
+    }
+  }
+}

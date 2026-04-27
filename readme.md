@@ -1,6 +1,3 @@
-# NOTE
-This repo serves as a playground of AW Development for integration of [GunCosmetics](https://github.com/Altered-Experiences/GunCosmetics) mod to TACZ. You may use and download the build under the original mod license, although we **don't** provide any help on this project.
-
 <p align="center">
     <img width="300" src="https://s2.loli.net/2024/04/30/NJrstR1QzpoLyIT.png" alt="title">
 </p>

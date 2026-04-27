@@ -1,0 +1,8 @@
+{
+  "name": "tacz.attachment.skin_blood.name",
+  "tooltip": "tacz.attachment.skin_blood.desc",
+  "display": "tacz:skin_blood_display",
+  "data": "tacz:skin_blood_data",
+  "type": "skin",
+  "sort": 13
+}

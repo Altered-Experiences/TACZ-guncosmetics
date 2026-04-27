@@ -1,0 +1,8 @@
+{
+  "name": "tacz.attachment.keychain_star.name",
+  "tooltip": "tacz.attachment.keychain_star.desc",
+  "display": "tacz:keychain_star_display",
+  "data": "tacz:keychain_star_data",
+  "type": "keychain",
+  "sort": 11
+}

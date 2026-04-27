@@ -1,0 +1,11 @@
+{
+  "slot": "tacz:attachment/slot/keychain_star",
+  "model": "tacz:attachment/keychain_star_geo",
+  "texture": "tacz:attachment/uv/keychain_star",
+  "adapter": "keychain_adapter",
+  "fov": 70,
+  "sounds": {
+    "install": "tacz:attachments/attachment_general_b",
+    "uninstall": "tacz:attachments/attachment_general_uninstall"
+  }
+}

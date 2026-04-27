@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.tacz.guns.cosmetic.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "guncosmetics.refmap.json",
+  "mixins": [],
+  "client": [
+    "GunItemRendererWrapperMixin",
+    "GunDisplayInstanceMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

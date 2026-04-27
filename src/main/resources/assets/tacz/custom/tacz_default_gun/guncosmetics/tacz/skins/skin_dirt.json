@@ -1,0 +1,12 @@
+{
+  "id": "tacz:skin_dirt",
+  "display_name": "tacz.attachment.skin_dirt.name",
+  "type": "universal",
+  "rarity": "common",
+  "overlay_texture": "gun/uv/overlay_dirt",
+  "blend_mode": "multiply",
+  "description": [
+    "tacz.attachment.skin_dirt.desc"
+  ],
+  "weight": 0.0
+}

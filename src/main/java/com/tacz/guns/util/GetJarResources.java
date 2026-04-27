@@ -104,25 +104,40 @@ public final class GetJarResources {
 
     private static void copyFolder(URI sourceURI, Path targetPath) throws IOException {
         if (Files.isDirectory(targetPath)) {
-            // 备份原文件夹
             backupFiles(targetPath);
-            // 删掉原文件夹，达到强行覆盖的效果
             deleteFiles(targetPath);
         }
-        // 使用 Files.walk() 遍历文件夹中的所有内容
-        try (Stream<Path> stream = Files.walk(Paths.get(sourceURI), Integer.MAX_VALUE)) {
+
+        Path sourceRoot;
+        if ("jar".equals(sourceURI.getScheme())) {
+            FileSystem fs;
+            try {
+                fs = FileSystems.newFileSystem(sourceURI, java.util.Collections.emptyMap());
+            } catch (FileSystemAlreadyExistsException e) {
+                fs = FileSystems.getFileSystem(sourceURI);
+            }
+            String spec = sourceURI.getRawSchemeSpecificPart();
+            int sep = spec.indexOf("!/");
+            if (sep != -1) {
+                sourceRoot = fs.getPath(spec.substring(sep + 1));
+            } else {
+                sourceRoot = fs.getPath("/");
+            }
+        } else {
+            sourceRoot = Paths.get(sourceURI);
+        }
+
+        try (Stream<Path> stream = Files.walk(sourceRoot)) {
             stream.forEach(source -> {
-                // 生成目标路径
-                Path target = targetPath.resolve(sourceURI.relativize(source.toUri()).toString());
                 try {
-                    // 复制文件或文件夹
+                    Path relative = sourceRoot.relativize(source);
+                    Path target = targetPath.resolve(relative.toString());
                     if (Files.isDirectory(source)) {
                         Files.createDirectories(target);
                     } else {
                         Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
                     }
                 } catch (IOException e) {
-                    // 处理异常，例如权限问题等
                     e.printStackTrace();
                 }
             });

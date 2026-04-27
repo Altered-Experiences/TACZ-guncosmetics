@@ -69,8 +69,18 @@ public class ModCreativeTabs {
             .icon(() -> AttachmentItemBuilder.create().setId(new ResourceLocation(GunMod.MOD_ID, "laser_compact")).build())
             .displayItems((parameters, output) -> output.acceptAll(AttachmentItem.fillItemCategory(AttachmentType.LASER))).build());
 
+    public static RegistryObject<CreativeModeTab> ATTACHMENT_SKIN_TAB = TABS.register("skin", () -> CreativeModeTab.builder()
+            .title(Component.translatable("tacz.type.skin.name")).withTabsBefore(ATTACHMENT_LASER_TAB.getId())
+            .icon(() -> AttachmentItemBuilder.create().setId(new ResourceLocation(GunMod.MOD_ID, "skin_golden")).build())
+            .displayItems((parameters, output) -> output.acceptAll(AttachmentItem.fillItemCategory(AttachmentType.SKIN))).build());
+
+    public static RegistryObject<CreativeModeTab> ATTACHMENT_KEYCHAIN_TAB = TABS.register("keychain", () -> CreativeModeTab.builder()
+            .title(Component.translatable("tacz.type.keychain.name")).withTabsBefore(ATTACHMENT_SKIN_TAB.getId())
+            .icon(() -> AttachmentItemBuilder.create().setId(new ResourceLocation(GunMod.MOD_ID, "keychain_charm")).build())
+            .displayItems((parameters, output) -> output.acceptAll(AttachmentItem.fillItemCategory(AttachmentType.KEYCHAIN))).build());
+
     public static RegistryObject<CreativeModeTab> GUN_PISTOL_TAB = TABS.register("pistol", () -> CreativeModeTab.builder()
-            .title(Component.translatable("tacz.type.pistol.name")).withTabsBefore(ATTACHMENT_LASER_TAB.getId())
+            .title(Component.translatable("tacz.type.pistol.name")).withTabsBefore(ATTACHMENT_KEYCHAIN_TAB.getId())
             .icon(() -> GunItemBuilder.create().setId(new ResourceLocation(GunMod.MOD_ID, "glock_17")).build())
             .displayItems((parameters, output) -> output.acceptAll(AbstractGunItem.fillItemCategory(GunTabType.PISTOL))).build());
 

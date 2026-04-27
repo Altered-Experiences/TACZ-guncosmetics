@@ -35,6 +35,8 @@ public class GunRefitScreen extends Screen {
     public static final ResourceLocation TURN_PAGE_TEXTURE = new ResourceLocation(GunMod.MOD_ID, "textures/gui/refit_turn_page.png");
     public static final ResourceLocation UNLOAD_TEXTURE = new ResourceLocation(GunMod.MOD_ID, "textures/gui/refit_unload.png");
     public static final ResourceLocation ICONS_TEXTURE = new ResourceLocation(GunMod.MOD_ID, "textures/gui/refit_slot_icons.png");
+    public static final ResourceLocation SKIN_ICON_TEXTURE = new ResourceLocation(GunMod.MOD_ID, "textures/gui/refit_icon_skin.png");
+    public static final ResourceLocation KEYCHAIN_ICON_TEXTURE = new ResourceLocation(GunMod.MOD_ID, "textures/gui/refit_icon_keychain.png");
 
     public static final int ICON_UV_SIZE = 32;
     public static final int SLOT_SIZE = 18;
@@ -75,6 +77,9 @@ public class GunRefitScreen extends Screen {
             case EXTENDED_MAG -> {
                 return ICON_UV_SIZE * 5;
             }
+            case SKIN, KEYCHAIN -> {
+                return ICON_UV_SIZE * 6;
+            }
         }
         return -1;
     }
@@ -92,7 +97,8 @@ public class GunRefitScreen extends Screen {
         this.addInventoryAttachmentButtons();
         // 添加属性图隐藏按钮
         if (HIDE_GUN_PROPERTY_DIAGRAMS) {
-            this.addRenderableWidget(new FlatColorButton(11, 11, 288, 16,
+            int buttonWidth = getPropertyDiagramButtonWidth();
+            this.addRenderableWidget(new FlatColorButton(11, 11, buttonWidth, 16,
                     Component.translatable("gui.tacz.gun_refit.property_diagrams.show"), b -> switchHideButton()));
         } else {
             this.addRenderableWidget(new FlatColorButton(14, 14, 12, 12, Component.literal("S"), b -> {
@@ -268,6 +274,14 @@ public class GunRefitScreen extends Screen {
             this.addRenderableWidget(button);
             startX = startX - SLOT_SIZE;
         }
+    }
+
+    private int getPropertyDiagramButtonWidth() {
+        long visibleSlotCount = java.util.Arrays.stream(AttachmentType.values())
+                .filter(type -> type != AttachmentType.NONE)
+                .count();
+        int leftMostSlotX = this.width - 30 - (int) (visibleSlotCount - 1) * SLOT_SIZE;
+        return Math.max(96, Math.min(288, leftMostSlotX - 17));
     }
 
     @Override

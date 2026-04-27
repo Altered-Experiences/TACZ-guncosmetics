@@ -9,6 +9,7 @@ import com.tacz.guns.api.item.builder.AmmoItemBuilder;
 import com.tacz.guns.api.item.builder.GunItemBuilder;
 import com.tacz.guns.client.renderer.item.GunItemRendererWrapper;
 import com.tacz.guns.client.resource.index.ClientGunIndex;
+import com.tacz.guns.cosmetic.registry.SkinRegistry;
 import com.tacz.guns.entity.shooter.ShooterDataHolder;
 import com.tacz.guns.inventory.tooltip.GunTooltip;
 import com.tacz.guns.resource.index.CommonGunIndex;
@@ -285,8 +286,17 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
         IAttachment iAttachment = IAttachment.getIAttachmentOrNull(attachmentItem);
         IGun iGun = IGun.getIGunOrNull(gun);
         if (iGun != null && iAttachment != null) {
+            AttachmentType type = iAttachment.getType(attachmentItem);
+            if (type == AttachmentType.KEYCHAIN) {
+                return true;
+            }
             ResourceLocation gunId = iGun.getGunId(gun);
             ResourceLocation attachmentId = iAttachment.getAttachmentId(attachmentItem);
+            if (type == AttachmentType.SKIN) {
+                return SkinRegistry.get(attachmentId)
+                        .map(skin -> skin.isApplicableTo(gunId))
+                        .orElse(false);
+            }
             return AllowAttachmentTagMatcher.match(gunId, attachmentId);
         }
         return false;
@@ -297,8 +307,15 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
      */
     @Override
     public boolean allowAttachmentType(ItemStack gun, AttachmentType type) {
+        if (type == AttachmentType.KEYCHAIN) {
+            return IGun.getIGunOrNull(gun) != null;
+        }
         IGun iGun = IGun.getIGunOrNull(gun);
         if (iGun != null) {
+            if (type == AttachmentType.SKIN) {
+                ResourceLocation gunId = iGun.getGunId(gun);
+                return SkinRegistry.getAll().stream().anyMatch(skin -> skin.isApplicableTo(gunId));
+            }
             return TimelessAPI.getCommonGunIndex(iGun.getGunId(gun)).map(gunIndex -> {
                 List<AttachmentType> allowAttachments = gunIndex.getGunData().getAllowAttachments();
                 if (allowAttachments == null) {

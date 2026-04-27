@@ -1,0 +1,8 @@
+{
+  "name": "tacz.attachment.skin_golden.name",
+  "tooltip": "tacz.attachment.skin_golden.desc",
+  "display": "tacz:skin_golden_display",
+  "data": "tacz:skin_golden_data",
+  "type": "skin",
+  "sort": 10
+}

@@ -34,6 +34,16 @@ public enum AttachmentType {
     @SerializedName("extended_mag")
     EXTENDED_MAG,
     /**
+     * 枪械皮肤
+     */
+    @SerializedName("skin")
+    SKIN,
+    /**
+     * 枪械挂件/钥匙扣
+     */
+    @SerializedName("keychain")
+    KEYCHAIN,
+    /**
      * 用来表示物品不是配件的情况。
      */
     NONE

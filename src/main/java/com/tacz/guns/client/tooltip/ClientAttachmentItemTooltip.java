@@ -14,22 +14,22 @@ import com.tacz.guns.client.resource.pojo.PackInfo;
 import com.tacz.guns.inventory.tooltip.AttachmentItemTooltip;
 import com.tacz.guns.resource.pojo.data.attachment.AttachmentData;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -38,6 +38,7 @@ public class ClientAttachmentItemTooltip implements ClientTooltipComponent {
     private static final Cache<ResourceLocation, List<ItemStack>> CACHE = CacheBuilder.newBuilder().expireAfterAccess(5, TimeUnit.SECONDS).build();
     private final ResourceLocation attachmentId;
     private final List<Component> components = Lists.newArrayList();
+    private @Nullable List<FormattedCharSequence> desc;
     private final MutableComponent tips = Component.translatable("tooltip.tacz.attachment.yaw.shift");
     private final MutableComponent support = Component.translatable("tooltip.tacz.attachment.yaw.support");
     private @Nullable MutableComponent packInfo;
@@ -76,10 +77,11 @@ public class ClientAttachmentItemTooltip implements ClientTooltipComponent {
 
     @Override
     public int getHeight() {
+        int descHeight = desc == null ? 0 : desc.size() * 10 + 2;
         if (!Screen.hasShiftDown()) {
-            return components.size() * 10 + 28;
+            return descHeight + components.size() * 10 + 28;
         }
-        return (showGuns.size() - 1) / 16 * 18 + 50 + components.size() * 10;
+        return descHeight + (showGuns.size() - 1) / 16 * 18 + 50 + components.size() * 10;
     }
 
     @Override
@@ -87,6 +89,9 @@ public class ClientAttachmentItemTooltip implements ClientTooltipComponent {
         int[] width = new int[]{0};
         if (packInfo != null) {
             width[0] = Math.max(width[0], font.width(packInfo) + 4);
+        }
+        if (desc != null) {
+            desc.forEach(c -> width[0] = Math.max(width[0], font.width(c)));
         }
         components.forEach(c -> width[0] = Math.max(width[0], font.width(c)));
         if (!Screen.hasShiftDown()) {
@@ -103,12 +108,19 @@ public class ClientAttachmentItemTooltip implements ClientTooltipComponent {
     @Override
     public void renderText(Font font, int pX, int pY, Matrix4f matrix4f, MultiBufferSource.BufferSource bufferSource) {
         int yOffset = pY;
+        if (desc != null) {
+            yOffset += 2;
+            for (FormattedCharSequence sequence : desc) {
+                font.drawInBatch(sequence, pX, yOffset, 0xaaaaaa, false, matrix4f, bufferSource, Font.DisplayMode.NORMAL, 0, 0xF000F0);
+                yOffset += 10;
+            }
+        }
         for (Component component : this.components) {
             font.drawInBatch(component, pX, yOffset, 0xffaa00, false, matrix4f, bufferSource, Font.DisplayMode.NORMAL, 0, 0xF000F0);
             yOffset += 10;
         }
         if (!Screen.hasShiftDown()) {
-            font.drawInBatch(tips, pX, pY + 5 + this.components.size() * 10, 0x9e9e9e, false, matrix4f, bufferSource, Font.DisplayMode.NORMAL, 0, 0xF000F0);
+            font.drawInBatch(tips, pX, yOffset + 5, 0x9e9e9e, false, matrix4f, bufferSource, Font.DisplayMode.NORMAL, 0, 0xF000F0);
             yOffset += 10;
         } else {
             yOffset += (showGuns.size() - 1) / 16 * 18 + 32;
@@ -124,7 +136,8 @@ public class ClientAttachmentItemTooltip implements ClientTooltipComponent {
         if (!Screen.hasShiftDown()) {
             return;
         }
-        int minY = components.size() * 10 + 3;
+        int descHeight = desc == null ? 0 : desc.size() * 10 + 2;
+        int minY = descHeight + components.size() * 10 + 3;
         int maxX = getWidth(font);
         gui.fill(mouseX, mouseY + minY, mouseX + maxX, mouseY + minY + 11, 0x8F00b0ff);
         gui.drawString(font, support, mouseX + 2, mouseY + minY + 2, 0xe3f2fd);
@@ -158,9 +171,8 @@ public class ClientAttachmentItemTooltip implements ClientTooltipComponent {
 
             @Nullable String tooltipKey = index.getTooltipKey();
             if (tooltipKey != null) {
-                String text = I18n.get(tooltipKey);
-                String[] split = text.split("\n");
-                Arrays.stream(split).forEach(s -> components.add(Component.literal(s).withStyle(ChatFormatting.GRAY)));
+                List<FormattedCharSequence> split = Minecraft.getInstance().font.split(Component.translatable(tooltipKey), 300);
+                this.desc = split.size() > 3 ? split.subList(0, 3) : split;
             }
 
             if (attachment.getItem() instanceof IAttachment iAttachment) {

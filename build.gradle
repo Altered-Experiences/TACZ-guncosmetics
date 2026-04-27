@@ -40,7 +40,9 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 mixin {
     add sourceSets.main, "tacz.refmap.json"
+    add sourceSets.main, "guncosmetics.refmap.json"
     config "tacz.mixins.json"
+    config "guncosmetics.mixins.json"
     config "tacz.compat.acceleratedrendering.mixins.json"
 }
 
@@ -52,9 +54,10 @@ minecraft {
     // 运行参数
     runs {
         client {
-            // 使用 JetBrainsRuntime 时需要的参数，否则无法热重载
-            // 如果你使用别的 JDK，那么可以删除这一行
-            jvmArgs "-XX:+AllowEnhancedClassRedefinition"
+            // Only JetBrains Runtime supports this flag. Plain JDKs fail before Minecraft starts.
+            if (System.getProperty("java.vm.name", "").toLowerCase(Locale.ROOT).contains("jetbrains")) {
+                jvmArgs "-XX:+AllowEnhancedClassRedefinition"
+            }
             // 每个启动单独区分文件夹
             workingDirectory project.file('run/client_a')
             property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
@@ -225,7 +228,6 @@ dependencies {
     runtimeOnly fg.deobf("curse.maven:carry-on-274259:${carry_on_id}")
 
     implementation fg.deobf("dev.kosmx.player-anim:player-animation-lib-forge:${player_animation_lib}")
-
     // kubejs开发环境引入
     compileOnly fg.deobf("dev.latvian.mods:kubejs-forge:${kubejs_version}")
     compileOnly fg.deobf("dev.latvian.mods:rhino-forge:${rhino_version}")
@@ -250,7 +252,7 @@ jar {
         attributes([
                 "Implementation-Title"  : project.name,
                 "Implementation-Version": project.version,
-                "MixinConfigs": "tacz.mixins.json, tacz.compat.acceleratedrendering.mixins.json"
+                "MixinConfigs": "tacz.mixins.json, guncosmetics.mixins.json, tacz.compat.acceleratedrendering.mixins.json"
         ])
     }
 }

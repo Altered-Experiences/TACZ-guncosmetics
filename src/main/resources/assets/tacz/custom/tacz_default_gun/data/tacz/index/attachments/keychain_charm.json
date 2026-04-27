@@ -1,0 +1,8 @@
+{
+  "name": "tacz.attachment.keychain_charm.name",
+  "tooltip": "tacz.attachment.keychain_charm.desc",
+  "display": "tacz:keychain_charm_display",
+  "data": "tacz:keychain_charm_data",
+  "type": "keychain",
+  "sort": 10
+}

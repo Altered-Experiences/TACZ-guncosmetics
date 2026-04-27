@@ -1,0 +1,11 @@
+{
+  "slot": "tacz:attachment/slot/skin_blood",
+  "model": "tacz:attachment/skin_blood_geo",
+  "texture": "tacz:attachment/uv/skin_blood",
+  "adapter": "skin_adapter",
+  "fov": 70,
+  "sounds": {
+    "install": "tacz:attachments/attachment_general_a",
+    "uninstall": "tacz:attachments/attachment_general_uninstall"
+  }
+}

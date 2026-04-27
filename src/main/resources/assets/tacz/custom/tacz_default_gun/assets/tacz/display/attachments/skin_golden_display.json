@@ -1,0 +1,11 @@
+{
+  "slot": "tacz:attachment/slot/skin_golden",
+  "model": "tacz:attachment/skin_golden_geo",
+  "texture": "tacz:attachment/uv/skin_golden",
+  "adapter": "skin_adapter",
+  "fov": 70,
+  "sounds": {
+    "install": "tacz:attachments/attachment_general_a",
+    "uninstall": "tacz:attachments/attachment_general_uninstall"
+  }
+}

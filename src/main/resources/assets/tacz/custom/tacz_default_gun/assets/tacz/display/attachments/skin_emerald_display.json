@@ -1,0 +1,11 @@
+{
+  "slot": "tacz:attachment/slot/skin_emerald",
+  "model": "tacz:attachment/skin_emerald_geo",
+  "texture": "tacz:attachment/uv/skin_emerald",
+  "adapter": "skin_adapter",
+  "fov": 70,
+  "sounds": {
+    "install": "tacz:attachments/attachment_general_a",
+    "uninstall": "tacz:attachments/attachment_general_uninstall"
+  }
+}

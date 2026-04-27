@@ -132,6 +132,8 @@
   "tooltip.tacz.attachment.grip": "Рукоятка",
   "tooltip.tacz.attachment.laser": "Лазер",
   "tooltip.tacz.attachment.extended_mag": "Расширенный магазин",
+  "tooltip.tacz.attachment.skin": "Скин",
+  "tooltip.tacz.attachment.keychain": "Брелок",
   "tooltip.tacz.attachment.none": "Ничего",
   "tooltip.tacz.attachment.zoom": "Увеличение: %s",
   "tooltip.tacz.attachment.extended_mag_level_1": "Расширенный магазин I",
@@ -275,6 +277,8 @@
   "config.tacz.client.render.enable_tooltip_id": "Отображать ID TACZ",
   "config.tacz.client.render.enable_tooltip_id.desc": "При включённых расширенных подсказках (F3+H) показывает ID оружия/патронов/обвеса.",
   "tooltip.tacz.attachment.laser.color": "Цвет лазера: %s",
+  "tacz.type.skin.name": "Скин",
+  "tacz.type.keychain.name": "Брелок",
   "config.tacz.client.render.laser_fadeout": "Эффект рассеивания лазера",
   "config.tacz.client.render.laser_fadeout.desc": "Применять ли эффект рассеивания к лазерному лучу. Выключите данный параметр, если испытываете проблемы с производительностью при включенных шейдерах"
 }

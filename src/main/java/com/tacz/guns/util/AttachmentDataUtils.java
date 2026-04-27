@@ -6,6 +6,8 @@ import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.api.item.attachment.AttachmentType;
 import com.tacz.guns.api.item.gun.FireMode;
 import com.tacz.guns.api.modifier.JsonProperty;
+import com.tacz.guns.cosmetic.registry.KeychainRegistry;
+import com.tacz.guns.cosmetic.registry.SkinRegistry;
 import com.tacz.guns.config.sync.SyncConfig;
 import com.tacz.guns.resource.index.CommonAttachmentIndex;
 import com.tacz.guns.resource.modifier.AttachmentCacheProperty;
@@ -40,6 +42,11 @@ public final class AttachmentDataUtils {
             }
             ResourceLocation attachmentId = iGun.getAttachmentId(gunItem, type);
             if (DefaultAssets.isEmptyAttachmentId(attachmentId)) {
+                continue;
+            }
+            AttachmentData cosmeticData = getCosmeticAttachmentData(type, attachmentId);
+            if (cosmeticData != null) {
+                dataConsumer.accept(cosmeticData);
                 continue;
             }
             AttachmentData attachmentData = gunData.getExclusiveAttachments().get(attachmentId);
@@ -97,30 +104,35 @@ public final class AttachmentDataUtils {
         List<Modifier> modifiers = new ArrayList<>();
         for (AttachmentType type : AttachmentType.values()){
             ResourceLocation id = iGun.getAttachmentId(gunItem, type);
+            if (DefaultAssets.isEmptyAttachmentId(id)) {
+                continue;
+            }
+            AttachmentData cosmeticData = getCosmeticAttachmentData(type, id);
+            if (cosmeticData != null) {
+                addWeightModifier(modifiers, cosmeticData);
+                continue;
+            }
             AttachmentData attachmentData = gunData.getExclusiveAttachments().get(id);
             if (attachmentData != null) {
-                var m = attachmentData.getModifier().get(WeightModifier.ID);
-                if(m != null && m.getValue() instanceof Modifier modifier) {
-                    modifiers.add(modifier);
-                } else {
-                    Modifier modifier = new Modifier();
-                    modifier.setAddend(attachmentData.getWeight());
-                    modifiers.add(modifier);
-                }
+                addWeightModifier(modifiers, attachmentData);
             } else {
                 TimelessAPI.getCommonAttachmentIndex(id).ifPresent(index -> {
-                    var m = index.getData().getModifier().get(WeightModifier.ID);
-                    if(m != null && m.getValue() instanceof Modifier modifier) {
-                        modifiers.add(modifier);
-                    } else {
-                        Modifier modifier = new Modifier();
-                        modifier.setAddend(index.getData().getWeight());
-                        modifiers.add(modifier);
-                    }
+                    addWeightModifier(modifiers, index.getData());
                 });
             }
         }
         return AttachmentPropertyManager.eval(modifiers, gunData.getWeight());
+    }
+
+    private static void addWeightModifier(List<Modifier> modifiers, AttachmentData attachmentData) {
+        var m = attachmentData.getModifier().get(WeightModifier.ID);
+        if (m != null && m.getValue() instanceof Modifier modifier) {
+            modifiers.add(modifier);
+        } else {
+            Modifier modifier = new Modifier();
+            modifier.setAddend(attachmentData.getWeight());
+            modifiers.add(modifier);
+        }
     }
 
     public static boolean isExplodeEnabled(ItemStack gunItem, GunData gunData) {
@@ -219,6 +231,14 @@ public final class AttachmentDataUtils {
             if (DefaultAssets.isEmptyAttachmentId(attachmentId)) {
                 continue;
             }
+            AttachmentData cosmeticData = getCosmeticAttachmentData(type, attachmentId);
+            if (cosmeticData != null) {
+                var m = cosmeticData.getModifier().get(id);
+                if(m != null && m.getValue() instanceof Modifier modifier) {
+                    modifiers.add(modifier);
+                }
+                continue;
+            }
             AttachmentData attachmentData = gunData.getExclusiveAttachments().get(attachmentId);
             if (attachmentData != null) {
                 var m = attachmentData.getModifier().get(id);
@@ -258,6 +278,15 @@ public final class AttachmentDataUtils {
             if (DefaultAssets.isEmptyAttachmentId(attachmentId)) {
                 continue;
             }
+            AttachmentData cosmeticData = getCosmeticAttachmentData(type, attachmentId);
+            if (cosmeticData != null) {
+                var m = cosmeticData.getModifier().get(id);
+                boolean value = resolve(m, resolver, clazz);
+                if (value) {
+                    return true;
+                }
+                continue;
+            }
             AttachmentData attachmentData = gunData.getExclusiveAttachments().get(attachmentId);
             if (attachmentData != null) {
                 var m = attachmentData.getModifier().get(id);
@@ -277,6 +306,16 @@ public final class AttachmentDataUtils {
             }
         }
         return false;
+    }
+
+    private static AttachmentData getCosmeticAttachmentData(AttachmentType type, ResourceLocation attachmentId) {
+        if (type == AttachmentType.SKIN) {
+            return SkinRegistry.get(attachmentId).map(skin -> skin.getAttachmentData()).orElse(null);
+        }
+        if (type == AttachmentType.KEYCHAIN) {
+            return KeychainRegistry.get(attachmentId).map(keychain -> keychain.getAttachmentData()).orElse(null);
+        }
+        return null;
     }
 
     private static <T> boolean resolve(JsonProperty<?> raw, BooleanResolver<T> data, Class<T> type){

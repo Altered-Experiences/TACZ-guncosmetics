@@ -1,0 +1,33 @@
+{
+  "format_version": "1.12.0",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.skin_emerald",
+        "texture_width": 64,
+        "texture_height": 64,
+        "visible_bounds_width": 1,
+        "visible_bounds_height": 1,
+        "visible_bounds_offset": [0, 0, 0]
+      },
+      "bones": [
+        {
+          "name": "skin_emerald",
+          "pivot": [0, 0, 0],
+          "cubes": [
+            {
+              "origin": [-1.2, -0.08, -0.45],
+              "size": [2.4, 0.16, 0.9],
+              "uv": [0, 0]
+            },
+            {
+              "origin": [-0.55, -0.22, -0.2],
+              "size": [1.1, 0.16, 0.4],
+              "uv": [16, 16]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
