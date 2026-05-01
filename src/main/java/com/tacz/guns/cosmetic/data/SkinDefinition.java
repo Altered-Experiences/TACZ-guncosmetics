@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 /**
- * Immutable definition of a weapon skin, loaded from a cosmetic pack JSON.
+ * Immutable definition of a weapon skin, built from normal TACZ attachment data.
  */
 public class SkinDefinition {
 
@@ -54,12 +54,6 @@ public class SkinDefinition {
     private final ResourceLocation icon;
     private final AttachmentData attachmentData;
 
-    // Raw byte data for network sync
-    @Nullable
-    private byte[] textureData;
-    @Nullable
-    private byte[] modelData;
-
     public SkinDefinition(ResourceLocation skinId, SkinType type, String displayName, CosmeticRarity rarity,
                           @Nullable ResourceLocation targetGun, @Nullable ResourceLocation texture,
                           @Nullable ResourceLocation modelOverride, @Nullable ResourceLocation overlayTexture,
@@ -99,11 +93,6 @@ public class SkinDefinition {
     public List<String> getDescription() { return description; }
     public ResourceLocation getIcon() { return icon; }
     public AttachmentData getAttachmentData() { return attachmentData; }
-
-    @Nullable public byte[] getTextureData() { return textureData; }
-    public void setTextureData(@Nullable byte[] data) { this.textureData = data; }
-    @Nullable public byte[] getModelData() { return modelData; }
-    public void setModelData(@Nullable byte[] data) { this.modelData = data; }
 
     /**
      * Check if this skin is applicable to the given gun ID.

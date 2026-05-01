@@ -1,0 +1,21 @@
+{
+  "materials": [
+    {
+      "item": {
+        "tag": "forge:dyes/red"
+      },
+      "count": 4
+    },
+    {
+      "item": {
+        "tag": "forge:leather"
+      },
+      "count": 2
+    }
+  ],
+  "result": {
+    "type": "attachment",
+    "id": "tacz:skin_blood"
+  },
+  "type": "tacz:gun_smith_table_crafting"
+}

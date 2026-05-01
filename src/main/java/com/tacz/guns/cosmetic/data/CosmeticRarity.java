@@ -32,7 +32,7 @@ public enum CosmeticRarity {
     }
 
     public Component getDisplayName() {
-        return Component.translatable("rarity.guncosmetics." + id)
+        return Component.translatable("rarity.tacz." + id)
                 .withStyle(Style.EMPTY.withColor(TextColor.fromRgb(color)));
     }
 

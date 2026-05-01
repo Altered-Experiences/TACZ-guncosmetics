@@ -1,0 +1,21 @@
+{
+  "materials": [
+    {
+      "item": {
+        "tag": "forge:ingots/iron"
+      },
+      "count": 2
+    },
+    {
+      "item": {
+        "item": "minecraft:string"
+      },
+      "count": 2
+    }
+  ],
+  "result": {
+    "type": "attachment",
+    "id": "tacz:keychain_charm"
+  },
+  "type": "tacz:gun_smith_table_crafting"
+}

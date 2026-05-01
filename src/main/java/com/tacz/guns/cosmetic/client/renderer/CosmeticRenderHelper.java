@@ -1,26 +1,22 @@
 package com.tacz.guns.cosmetic.client.renderer;
 
-import com.tacz.guns.cosmetic.GunCosmeticsMod;
-import com.tacz.guns.cosmetic.data.CosmeticNBTHelper;
 import com.tacz.guns.cosmetic.data.KeychainDefinition;
 import com.tacz.guns.cosmetic.data.SkinDefinition;
-import com.tacz.guns.cosmetic.client.renderer.keychain.KeychainGeoRenderCache;
-import com.tacz.guns.cosmetic.registry.KeychainRegistry;
-import com.tacz.guns.cosmetic.registry.SkinRegistry;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
+import com.tacz.guns.GunMod;
 import com.tacz.guns.api.TimelessAPI;
 import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.api.item.attachment.AttachmentType;
 import com.tacz.guns.client.model.BedrockGunModel;
 import com.tacz.guns.client.model.bedrock.BedrockPart;
 import com.tacz.guns.resource.pojo.data.gun.KeychainAttachment;
+import com.tacz.guns.resource.CommonAssetsManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import org.joml.Vector3f;
@@ -30,7 +26,7 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 
 /**
- * Helper class for cosmetic rendering — skin texture swap, overlay, and keychain.
+ * Helper class for attachment skin texture swap, overlay, and keychain rendering.
  */
 public final class CosmeticRenderHelper {
 
@@ -62,15 +58,14 @@ public final class CosmeticRenderHelper {
     public static ResourceLocation resolveGunTexture(ItemStack stack, ResourceLocation originalTexture) {
         if (stack == null || stack.isEmpty()) return originalTexture;
 
-        ResourceLocation skinId = CosmeticNBTHelper.getSkinId(stack);
-        if ((skinId == null || com.tacz.guns.api.DefaultAssets.isEmptyAttachmentId(skinId))
-                && stack.getItem() instanceof IGun iGun) {
+        ResourceLocation skinId = null;
+        if (stack.getItem() instanceof IGun iGun) {
             skinId = iGun.getAttachmentId(stack, AttachmentType.SKIN);
         }
         if (skinId == null) return originalTexture;
         if (com.tacz.guns.api.DefaultAssets.isEmptyAttachmentId(skinId)) return originalTexture;
 
-        return SkinRegistry.get(skinId)
+        return CommonAssetsManager.getSkinAttachment(skinId)
                 .map(skin -> {
                     if (skin.getType() == SkinDefinition.SkinType.UNIVERSAL) {
                         return CosmeticTextureManager.resolvePaintjobTexture(originalTexture, skin);
@@ -144,80 +139,33 @@ public final class CosmeticRenderHelper {
 
     @Nullable
     private static KeychainRenderContext createKeychainContext(ItemStack stack, IGun iGun, BedrockGunModel gunModel) {
-        ResourceLocation keychainId = CosmeticNBTHelper.getKeychainId(stack);
-        if (keychainId == null || com.tacz.guns.api.DefaultAssets.isEmptyAttachmentId(keychainId)) {
-            keychainId = iGun.getAttachmentId(stack, AttachmentType.KEYCHAIN);
-        }
+        ResourceLocation keychainId = iGun.getAttachmentId(stack, AttachmentType.KEYCHAIN);
         if (keychainId == null) return null;
         if (com.tacz.guns.api.DefaultAssets.isEmptyAttachmentId(keychainId)) return null;
 
         ResourceLocation finalKeychainId = keychainId;
-        return KeychainRegistry.get(finalKeychainId).map(kc -> {
-            // Get the gun ID for auto-attach caching
+        return CommonAssetsManager.getKeychainAttachment(finalKeychainId).map(kc -> {
             ResourceLocation gunId = iGun.getGunId(stack);
 
-            CompoundTag transform = CosmeticNBTHelper.getKeychainTransform(stack);
             KeychainAttachment gunAttach = TimelessAPI.getCommonGunIndex(gunId)
                     .map(index -> index.getGunData().getKeychainAttachment())
                     .orElse(null);
-            String boneName = transform != null && transform.contains("Bone") ? transform.getString("Bone") :
-                    (gunAttach != null ? gunAttach.getBone() : kc.getBone());
-
-            BedrockPart bone = gunModel.getNode(boneName);
-            Vector3f offset = gunAttach != null ? gunAttach.getOffset() : kc.getOffset();
-            Vector3f rotation = gunAttach != null ? gunAttach.getRotation() : kc.getRotation();
-            Vector3f scale = gunAttach != null ? gunAttach.getScale() : kc.getScale();
-            boolean hasValidTransformBone = transform != null && bone != null;
-
-            if (bone == null && transform != null) {
-                boneName = gunAttach != null ? gunAttach.getBone() : kc.getBone();
-                bone = gunModel.getNode(boneName);
+            if (gunAttach == null || gunAttach.getBone() == null || gunAttach.getBone().isBlank()) {
+                return null;
             }
 
+            BedrockPart bone = gunModel.getNode(gunAttach.getBone());
             if (bone == null) {
-                KeychainAutoAttach.AttachResult autoResult =
-                        KeychainAutoAttach.findAttachPoint(gunId, gunModel);
-                if (autoResult == null) return null;
-
-                bone = autoResult.bone;
-                offset = autoResult.offset;
-                rotation = autoResult.rotation;
-                scale = autoResult.scale;
-                GunCosmeticsMod.LOGGER.debug("Keychain '{}' auto-attached to bone '{}' on gun '{}'",
-                        finalKeychainId, bone.name, gunId);
+                GunMod.LOGGER.debug("Keychain '{}' skipped on gun '{}': bone '{}' was not found",
+                        finalKeychainId, gunId, gunAttach.getBone());
+                return null;
             }
 
-            if (transform != null && hasValidTransformBone) {
-                offset = new Vector3f(
-                        transform.getFloat("OffsetX"),
-                        transform.getFloat("OffsetY"),
-                        transform.getFloat("OffsetZ"));
-                rotation = new Vector3f(
-                        transform.getFloat("RotX"),
-                        transform.getFloat("RotY"),
-                        transform.getFloat("RotZ"));
-                scale = new Vector3f(
-                        transform.getFloat("ScaleX"),
-                        transform.getFloat("ScaleY"),
-                        transform.getFloat("ScaleZ"));
-            }
-
-            return new KeychainRenderContext(kc, bone, offset, rotation, scale);
+            return new KeychainRenderContext(kc, bone,
+                    gunAttach.getOffset(),
+                    gunAttach.getRotation(),
+                    gunAttach.getScale());
         }).orElse(null);
-    }
-
-    /**
-     * Returns true if the keychain definition has default/zero transform values,
-     * meaning the auto-attach system should provide its own computed transform.
-     */
-    private static boolean isDefaultTransform(KeychainDefinition kc) {
-        Vector3f o = kc.getOffset();
-        Vector3f r = kc.getRotation();
-        Vector3f s = kc.getScale();
-        boolean defaultOffset = o.x() == 0 && o.y() == 0 && o.z() == 0;
-        boolean defaultRotation = r.x() == 0 && r.y() == 0 && r.z() == 0;
-        boolean defaultScale = s.x() == 1 && s.y() == 1 && s.z() == 1;
-        return defaultOffset && defaultRotation && defaultScale;
     }
 
     private static void applyBonePath(PoseStack poseStack, BedrockPart bone) {
@@ -238,11 +186,6 @@ public final class CosmeticRenderHelper {
     private static void renderKeychainModel(KeychainDefinition kc, PoseStack poseStack,
                                              MultiBufferSource bufferSource, int light) {
         ResourceLocation texture = CosmeticTextureManager.resolveTexture(kc.getTexture());
-        if (KeychainGeoRenderCache.render(kc, poseStack, bufferSource, light)) {
-            return;
-        }
-
-        applySwayAnimation(kc, poseStack);
 
         if (KeychainModelCache.get(kc) != null) {
             poseStack.pushPose();
@@ -272,17 +215,6 @@ public final class CosmeticRenderHelper {
         drawQuadHoriz(consumer, poseStack, -1, -1, 1, -1, 0, 0, 1, 1, light, 0, -1, 0);
 
         poseStack.popPose();
-    }
-
-    private static void applySwayAnimation(KeychainDefinition kc, PoseStack poseStack) {
-        long millis = System.currentTimeMillis();
-        float phase = (millis % 2400L) / 2400.0F * ((float) Math.PI * 2.0F);
-        float idOffset = Math.abs(kc.getKeychainId().hashCode() % 360) * 0.017453292F;
-        float swing = (float) Math.sin(phase + idOffset);
-        float twist = (float) Math.cos(phase * 0.62F + idOffset);
-        poseStack.translate(0.0F, Math.abs(swing) * 0.006F, 0.0F);
-        poseStack.mulPose(Axis.ZP.rotationDegrees(swing * 7.0F));
-        poseStack.mulPose(Axis.XP.rotationDegrees(twist * 3.0F));
     }
 
     private static void drawQuad(VertexConsumer consumer, PoseStack poseStack,

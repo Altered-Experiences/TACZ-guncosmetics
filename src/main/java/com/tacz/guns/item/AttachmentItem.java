@@ -7,11 +7,9 @@ import com.tacz.guns.api.item.builder.AttachmentItemBuilder;
 import com.tacz.guns.api.item.nbt.AttachmentItemDataAccessor;
 import com.tacz.guns.client.renderer.item.AttachmentItemRenderer;
 import com.tacz.guns.client.resource.index.ClientAttachmentIndex;
-import com.tacz.guns.cosmetic.config.CosmeticsConfig;
 import com.tacz.guns.cosmetic.data.CosmeticRarity;
-import com.tacz.guns.cosmetic.registry.KeychainRegistry;
-import com.tacz.guns.cosmetic.registry.SkinRegistry;
 import com.tacz.guns.inventory.tooltip.AttachmentItemTooltip;
+import com.tacz.guns.resource.CommonAssetsManager;
 import com.tacz.guns.resource.index.CommonAttachmentIndex;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
@@ -75,28 +73,26 @@ public class AttachmentItem extends Item implements AttachmentItemDataAccessor {
     public void appendHoverText(@Nonnull ItemStack stack, Level level, @Nonnull List<Component> tooltip, @Nonnull TooltipFlag flag) {
         ResourceLocation attachmentId = this.getAttachmentId(stack);
         getCosmeticRarity(attachmentId).ifPresent(rarity -> {
-            if (CosmeticsConfig.SHOW_RARITY_IN_TOOLTIP.get()) {
-                tooltip.add(Component.translatable("tooltip.guncosmetics.rarity", rarity.getDisplayName()));
-            }
+            tooltip.add(Component.translatable("tooltip.tacz.rarity", rarity.getDisplayName()));
         });
     }
 
     private static Optional<Component> getCosmeticDisplayName(ResourceLocation attachmentId) {
-        Optional<Component> skinName = SkinRegistry.get(attachmentId)
+        Optional<Component> skinName = CommonAssetsManager.getSkinAttachment(attachmentId)
                 .map(skin -> Component.translatable(skin.getDisplayName()));
         if (skinName.isPresent()) {
             return skinName;
         }
-        return KeychainRegistry.get(attachmentId)
+        return CommonAssetsManager.getKeychainAttachment(attachmentId)
                 .map(keychain -> Component.translatable(keychain.getDisplayName()));
     }
 
     private static Optional<CosmeticRarity> getCosmeticRarity(ResourceLocation attachmentId) {
-        Optional<CosmeticRarity> skinRarity = SkinRegistry.get(attachmentId).map(skin -> skin.getRarity());
+        Optional<CosmeticRarity> skinRarity = CommonAssetsManager.getSkinAttachment(attachmentId).map(skin -> skin.getRarity());
         if (skinRarity.isPresent()) {
             return skinRarity;
         }
-        return KeychainRegistry.get(attachmentId).map(keychain -> keychain.getRarity());
+        return CommonAssetsManager.getKeychainAttachment(attachmentId).map(keychain -> keychain.getRarity());
     }
 
     private static Comparator<Map.Entry<ResourceLocation, CommonAttachmentIndex>> idNameSort() {

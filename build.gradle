@@ -30,7 +30,7 @@ apply plugin: 'eclipse'
 apply plugin: 'org.spongepowered.mixin'
 apply plugin: 'java'
 
-version = "1.1.7-hotfix2"
+version = "1.1.8-trinkets"
 // 版本号，正式发布需要修改这一行
 //version = FORMAT.format(new Date())
 group = "com.tacz"
@@ -40,9 +40,7 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 mixin {
     add sourceSets.main, "tacz.refmap.json"
-    add sourceSets.main, "guncosmetics.refmap.json"
     config "tacz.mixins.json"
-    config "guncosmetics.mixins.json"
     config "tacz.compat.acceleratedrendering.mixins.json"
 }
 
@@ -75,7 +73,7 @@ minecraft {
             parent minecraft.runs.client
             workingDirectory project.file('run/client_b')
             // 设定用户名
-            args '--username', 'mayday_memory'
+            args '--username', 'sfortzaphantom'
             mods {
                 tacz {
                     source sourceSets.main
@@ -228,6 +226,7 @@ dependencies {
     runtimeOnly fg.deobf("curse.maven:carry-on-274259:${carry_on_id}")
 
     implementation fg.deobf("dev.kosmx.player-anim:player-animation-lib-forge:${player_animation_lib}")
+    implementation fg.deobf("curse.maven:geckolib-388172:${geckolib_id}")
     // kubejs开发环境引入
     compileOnly fg.deobf("dev.latvian.mods:kubejs-forge:${kubejs_version}")
     compileOnly fg.deobf("dev.latvian.mods:rhino-forge:${rhino_version}")
@@ -252,7 +251,7 @@ jar {
         attributes([
                 "Implementation-Title"  : project.name,
                 "Implementation-Version": project.version,
-                "MixinConfigs": "tacz.mixins.json, guncosmetics.mixins.json, tacz.compat.acceleratedrendering.mixins.json"
+                "MixinConfigs": "tacz.mixins.json, tacz.compat.acceleratedrendering.mixins.json"
         ])
     }
 }

@@ -3233,6 +3233,11 @@
 					"pivot": [0, 4, 0]
 				},
 				{
+					"name": "keychain_adapter",
+					"parent": "lower2",
+					"pivot": [1.05, 1.95, 5.75]
+				},
+				{
 					"name": "parts",
 					"parent": "lower2",
 					"pivot": [0, 4, 0]
@@ -6084,6 +6089,18 @@
 					"name": "refit_view",
 					"parent": "view",
 					"pivot": [15.475, 3.55, 3.2],
+					"rotation": [0, 90, 0]
+				},
+				{
+					"name": "refit_skin_view",
+					"parent": "view",
+					"pivot": [15.475, 3.55, 3.2],
+					"rotation": [0, 90, 0]
+				},
+				{
+					"name": "refit_keychain_view",
+					"parent": "view",
+					"pivot": [10.0, 3.6, 5.0],
 					"rotation": [0, 90, 0]
 				},
 				{

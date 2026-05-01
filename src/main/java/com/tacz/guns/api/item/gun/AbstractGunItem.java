@@ -9,10 +9,10 @@ import com.tacz.guns.api.item.builder.AmmoItemBuilder;
 import com.tacz.guns.api.item.builder.GunItemBuilder;
 import com.tacz.guns.client.renderer.item.GunItemRendererWrapper;
 import com.tacz.guns.client.resource.index.ClientGunIndex;
-import com.tacz.guns.cosmetic.registry.SkinRegistry;
 import com.tacz.guns.entity.shooter.ShooterDataHolder;
 import com.tacz.guns.inventory.tooltip.GunTooltip;
 import com.tacz.guns.resource.index.CommonGunIndex;
+import com.tacz.guns.resource.CommonAssetsManager;
 import com.tacz.guns.resource.pojo.data.gun.FeedType;
 import com.tacz.guns.resource.pojo.data.gun.GunData;
 import com.tacz.guns.util.AllowAttachmentTagMatcher;
@@ -287,15 +287,17 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
         IGun iGun = IGun.getIGunOrNull(gun);
         if (iGun != null && iAttachment != null) {
             AttachmentType type = iAttachment.getType(attachmentItem);
-            if (type == AttachmentType.KEYCHAIN) {
-                return true;
-            }
             ResourceLocation gunId = iGun.getGunId(gun);
             ResourceLocation attachmentId = iAttachment.getAttachmentId(attachmentItem);
             if (type == AttachmentType.SKIN) {
-                return SkinRegistry.get(attachmentId)
+                return hasAttachmentType(gunId, type)
+                        && AllowAttachmentTagMatcher.match(gunId, attachmentId)
+                        && CommonAssetsManager.getSkinAttachment(attachmentId)
                         .map(skin -> skin.isApplicableTo(gunId))
                         .orElse(false);
+            }
+            if (type == AttachmentType.KEYCHAIN && !hasKeychainAttachmentBone(gunId)) {
+                return false;
             }
             return AllowAttachmentTagMatcher.match(gunId, attachmentId);
         }
@@ -307,18 +309,18 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
      */
     @Override
     public boolean allowAttachmentType(ItemStack gun, AttachmentType type) {
-        if (type == AttachmentType.KEYCHAIN) {
-            return IGun.getIGunOrNull(gun) != null;
-        }
         IGun iGun = IGun.getIGunOrNull(gun);
         if (iGun != null) {
             if (type == AttachmentType.SKIN) {
                 ResourceLocation gunId = iGun.getGunId(gun);
-                return SkinRegistry.getAll().stream().anyMatch(skin -> skin.isApplicableTo(gunId));
+                return hasAttachmentType(gunId, type) && !CommonAssetsManager.getSkinAttachmentsForGun(gunId).isEmpty();
             }
             return TimelessAPI.getCommonGunIndex(iGun.getGunId(gun)).map(gunIndex -> {
                 List<AttachmentType> allowAttachments = gunIndex.getGunData().getAllowAttachments();
                 if (allowAttachments == null) {
+                    return false;
+                }
+                if (type == AttachmentType.KEYCHAIN && !hasKeychainAttachmentBone(iGun.getGunId(gun))) {
                     return false;
                 }
                 return allowAttachments.contains(type);
@@ -326,6 +328,23 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
         } else {
             return false;
         }
+    }
+
+    private static boolean hasKeychainAttachmentBone(ResourceLocation gunId) {
+        return TimelessAPI.getCommonGunIndex(gunId).map(gunIndex -> {
+            var attachment = gunIndex.getGunData().getKeychainAttachment();
+            if (attachment == null || attachment.getBone() == null) {
+                return false;
+            }
+            return !attachment.getBone().isBlank();
+        }).orElse(false);
+    }
+
+    private static boolean hasAttachmentType(ResourceLocation gunId, AttachmentType type) {
+        return TimelessAPI.getCommonGunIndex(gunId).map(gunIndex -> {
+            List<AttachmentType> allowAttachments = gunIndex.getGunData().getAllowAttachments();
+            return allowAttachments != null && allowAttachments.contains(type);
+        }).orElse(false);
     }
 
     /**

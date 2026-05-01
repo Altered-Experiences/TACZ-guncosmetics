@@ -12,7 +12,11 @@
   ],
   "client": [
     "client.AbstractButtonMixin",
+    "client.BedrockGunModelMixin",
+    "client.BedrockPartMixin",
     "client.GameRendererMixin",
+    "client.GunDisplayInstanceMixin",
+    "client.GunItemRendererWrapperMixin",
     "client.HumanoidModelMixin",
     "client.ItemInHandLayerMixin",
     "client.ItemInHandRendererMixin",

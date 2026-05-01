@@ -35,6 +35,11 @@
 					"pivot": [0.5, 7.375, 10.125]
 				},
 				{
+					"name": "keychain_adapter",
+					"parent": "AKM",
+					"pivot": [1.35, 3.85, 10.65]
+				},
+				{
 					"name": "wood",
 					"parent": "stock_default",
 					"pivot": [0, 8.5862, 10.86158],
@@ -9095,6 +9100,18 @@
 					"name": "refit_view",
 					"parent": "views",
 					"pivot": [20, 9, -2],
+					"rotation": [0, 90, 0]
+				},
+				{
+					"name": "refit_skin_view",
+					"parent": "views",
+					"pivot": [20, 9, -2],
+					"rotation": [0, 90, 0]
+				},
+				{
+					"name": "refit_keychain_view",
+					"parent": "views",
+					"pivot": [12, 8, 12],
 					"rotation": [0, 90, 0]
 				},
 				{

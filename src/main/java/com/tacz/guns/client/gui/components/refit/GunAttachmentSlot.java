@@ -70,6 +70,9 @@ public class GunAttachmentSlot extends Button implements IStackTooltip {
         this.attachmentItem = iGun.getAttachment(gunItem, type);
         if (!attachmentItem.isEmpty()) {
             graphics.renderItem(attachmentItem, x + 1, y + 1);
+        } else if (!isAllow()) {
+            int xOffset = GunRefitScreen.getSlotTextureXOffset(gunItem, type);
+            graphics.blit(GunRefitScreen.ICONS_TEXTURE, x + 2, y + 2, width - 4, height - 4, xOffset, 0, GunRefitScreen.ICON_UV_SIZE, GunRefitScreen.ICON_UV_SIZE, GunRefitScreen.getSlotsTextureWidth(), GunRefitScreen.ICON_UV_SIZE);
         } else if (type == AttachmentType.SKIN) {
             graphics.blit(GunRefitScreen.SKIN_ICON_TEXTURE, x + 2, y + 2, 0, 0, width - 4, height - 4, width - 4, height - 4);
         } else if (type == AttachmentType.KEYCHAIN) {

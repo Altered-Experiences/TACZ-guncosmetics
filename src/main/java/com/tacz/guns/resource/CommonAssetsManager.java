@@ -5,6 +5,11 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.tacz.guns.api.vmlib.LuaGunLogicConstant;
 import com.tacz.guns.api.vmlib.LuaLibrary;
+import com.tacz.guns.api.item.attachment.AttachmentType;
+import com.tacz.guns.GunMod;
+import com.tacz.guns.cosmetic.data.CosmeticRarity;
+import com.tacz.guns.cosmetic.data.KeychainDefinition;
+import com.tacz.guns.cosmetic.data.SkinDefinition;
 import com.tacz.guns.crafting.GunSmithTableIngredient;
 import com.tacz.guns.crafting.GunSmithTableRecipe;
 import com.tacz.guns.crafting.result.GunSmithTableResult;
@@ -43,6 +48,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.server.ServerLifecycleHooks;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 import org.luaj.vm2.LuaTable;
 
 import java.util.*;
@@ -220,6 +226,150 @@ public class CommonAssetsManager implements ICommonResourceProvider {
         return INSTANCE == null ? CommonNetworkCache.INSTANCE : INSTANCE;
     }
 
+    public static Optional<SkinDefinition> getSkinAttachment(ResourceLocation id) {
+        CommonAttachmentIndex index = get().getAttachmentIndex(id);
+        if (index == null || index.getType() != AttachmentType.SKIN) {
+            return Optional.empty();
+        }
+        return createSkinAttachment(id, index);
+    }
+
+    public static List<SkinDefinition> getAllSkinAttachments() {
+        List<SkinDefinition> result = new ArrayList<>();
+        for (Map.Entry<ResourceLocation, CommonAttachmentIndex> entry : get().getAllAttachments()) {
+            if (entry.getValue().getType() == AttachmentType.SKIN) {
+                createSkinAttachment(entry.getKey(), entry.getValue()).ifPresent(result::add);
+            }
+        }
+        return result;
+    }
+
+    public static List<SkinDefinition> getSkinAttachmentsForGun(ResourceLocation gunId) {
+        return getAllSkinAttachments().stream().filter(skin -> skin.isApplicableTo(gunId)).toList();
+    }
+
+    public static Optional<KeychainDefinition> getKeychainAttachment(ResourceLocation id) {
+        CommonAttachmentIndex index = get().getAttachmentIndex(id);
+        if (index == null || index.getType() != AttachmentType.KEYCHAIN) {
+            return Optional.empty();
+        }
+        return createKeychainAttachment(id, index);
+    }
+
+    public static Optional<AttachmentData> getCosmeticAttachmentData(AttachmentType type, ResourceLocation id) {
+        if (type != AttachmentType.SKIN && type != AttachmentType.KEYCHAIN) {
+            return Optional.empty();
+        }
+        CommonAttachmentIndex index = get().getAttachmentIndex(id);
+        if (index == null || index.getType() != type || getCosmeticData(index) == null) {
+            return Optional.empty();
+        }
+        return Optional.of(index.getData());
+    }
+
+    private static Optional<SkinDefinition> createSkinAttachment(ResourceLocation id, CommonAttachmentIndex index) {
+        AttachmentData.CosmeticData cosmetic = getCosmeticData(index);
+        if (cosmetic == null || cosmetic.getSkin() == null) {
+            return Optional.empty();
+        }
+
+        try {
+            AttachmentData.SkinData skin = cosmetic.getSkin();
+            SkinDefinition.SkinType type = "universal".equalsIgnoreCase(skin.getType())
+                    ? SkinDefinition.SkinType.UNIVERSAL
+                    : SkinDefinition.SkinType.SPECIFIC;
+            if (type == SkinDefinition.SkinType.SPECIFIC && (skin.getTargetGun() == null || skin.getTexture() == null)) {
+                throw new IllegalArgumentException("Specific skin requires cosmetic.skin.target_gun and cosmetic.skin.texture");
+            }
+            if (type == SkinDefinition.SkinType.UNIVERSAL && skin.getOverlayTexture() == null) {
+                throw new IllegalArgumentException("Universal skin requires cosmetic.skin.overlay_texture");
+            }
+
+            var pojo = index.getPojo();
+            return Optional.of(new SkinDefinition(
+                    id,
+                    type,
+                    pojo.getName(),
+                    CosmeticRarity.fromString(cosmetic.getRarity()),
+                    skin.getTargetGun(),
+                    skin.getTexture(),
+                    skin.getModelOverride(),
+                    skin.getOverlayTexture(),
+                    SkinDefinition.BlendMode.fromString(skin.getBlendMode()),
+                    description(cosmetic, pojo),
+                    cosmetic.getIcon(),
+                    index.getData()
+            ));
+        } catch (Exception e) {
+            GunMod.LOGGER.warn("Failed to read skin attachment {}", id, e);
+            return Optional.empty();
+        }
+    }
+
+    private static Optional<KeychainDefinition> createKeychainAttachment(ResourceLocation id, CommonAttachmentIndex index) {
+        AttachmentData.CosmeticData cosmetic = getCosmeticData(index);
+        if (cosmetic == null || cosmetic.getKeychain() == null) {
+            return Optional.empty();
+        }
+
+        try {
+            AttachmentData.KeychainData keychain = cosmetic.getKeychain();
+            AttachmentData.KeychainAttachmentData attachment = keychain.getDefaultAttachment();
+            ResourceLocation model = keychain.getModel();
+            if (model == null) {
+                model = new ResourceLocation(id.getNamespace(), "attachment/" + id.getPath() + "_geo");
+            }
+            ResourceLocation texture = keychain.getTexture();
+            if (texture == null) {
+                texture = new ResourceLocation(id.getNamespace(), "attachment/uv/" + id.getPath());
+            }
+
+            var pojo = index.getPojo();
+            return Optional.of(new KeychainDefinition(
+                    id,
+                    pojo.getName(),
+                    CosmeticRarity.fromString(cosmetic.getRarity()),
+                    model,
+                    texture,
+                    attachment != null ? attachment.getBone() : "stock",
+                    vec(attachment != null ? attachment.getOffset() : null, 0.0f, 0.0f, 0.0f),
+                    vec(attachment != null ? attachment.getRotation() : null, 0.0f, 0.0f, 0.0f),
+                    vec(attachment != null ? attachment.getScale() : null, 1.0f, 1.0f, 1.0f),
+                    description(cosmetic, pojo),
+                    cosmetic.getIcon(),
+                    index.getData()
+            ));
+        } catch (Exception e) {
+            GunMod.LOGGER.warn("Failed to read keychain attachment {}", id, e);
+            return Optional.empty();
+        }
+    }
+
+    @Nullable
+    private static AttachmentData.CosmeticData getCosmeticData(CommonAttachmentIndex index) {
+        return index.getData().getCosmeticData();
+    }
+
+    private static List<String> description(AttachmentData.CosmeticData cosmetic, com.tacz.guns.resource.pojo.AttachmentIndexPOJO pojo) {
+        List<String> result = new ArrayList<>();
+        String[] cosmeticDescription = cosmetic.getDescription();
+        if (cosmeticDescription != null) {
+            result.addAll(List.of(cosmeticDescription));
+        }
+        if (result.isEmpty() && pojo.getTooltip() != null) {
+            result.add(pojo.getTooltip());
+        }
+        return result;
+    }
+
+    private static Vector3f vec(float[] values, float x, float y, float z) {
+        return new Vector3f(
+                values != null && values.length > 0 ? values[0] : x,
+                values != null && values.length > 1 ? values[1] : y,
+                values != null && values.length > 2 ? values[2] : z
+        );
+    }
+
     @SubscribeEvent
     public static void onReload(AddReloadListenerEvent event) {
         var commonAssetsManager = new CommonAssetsManager();
@@ -278,5 +428,3 @@ public class CommonAssetsManager implements ICommonResourceProvider {
         server.reloadResources(collection);
     }
 }
-
-

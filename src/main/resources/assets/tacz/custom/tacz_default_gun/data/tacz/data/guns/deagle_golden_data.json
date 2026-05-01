@@ -106,6 +106,13 @@
     "scope",
     "muzzle",
     "extended_mag",
-    "laser"
-  ]
+    "laser",
+    "keychain"
+  ],
+  "keychain_attachment": {
+    "bone": "keychain_adapter",
+    "offset": [0.0, 0.0, 0.0],
+    "rotation": [0.0, 90.0, 0.0],
+    "scale": [1.0, 1.0, 1.0]
+  }
 }

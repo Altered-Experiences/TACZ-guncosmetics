@@ -5,7 +5,7 @@ import org.joml.Vector3f;
 
 public class KeychainAttachment {
     @SerializedName("bone")
-    private String bone = "keychain";
+    private String bone = "";
 
     @SerializedName("offset")
     private float[] offset = new float[]{0.0f, 0.0f, 0.0f};

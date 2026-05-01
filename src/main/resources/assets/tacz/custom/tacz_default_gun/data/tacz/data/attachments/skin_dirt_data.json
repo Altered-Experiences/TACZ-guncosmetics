@@ -1,3 +1,14 @@
 {
-  "weight": 0.0
+  "weight": 0.0,
+  "cosmetic": {
+    "rarity": "common",
+    "skin": {
+      "type": "universal",
+      "overlay_texture": "tacz:attachment/uv/skin_dirt",
+      "blend_mode": "multiply"
+    }
+  },
+  "movement_speed": {
+    "base": 0.01
+  }
 }

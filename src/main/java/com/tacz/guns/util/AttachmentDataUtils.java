@@ -6,8 +6,7 @@ import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.api.item.attachment.AttachmentType;
 import com.tacz.guns.api.item.gun.FireMode;
 import com.tacz.guns.api.modifier.JsonProperty;
-import com.tacz.guns.cosmetic.registry.KeychainRegistry;
-import com.tacz.guns.cosmetic.registry.SkinRegistry;
+import com.tacz.guns.resource.CommonAssetsManager;
 import com.tacz.guns.config.sync.SyncConfig;
 import com.tacz.guns.resource.index.CommonAttachmentIndex;
 import com.tacz.guns.resource.modifier.AttachmentCacheProperty;
@@ -310,10 +309,10 @@ public final class AttachmentDataUtils {
 
     private static AttachmentData getCosmeticAttachmentData(AttachmentType type, ResourceLocation attachmentId) {
         if (type == AttachmentType.SKIN) {
-            return SkinRegistry.get(attachmentId).map(skin -> skin.getAttachmentData()).orElse(null);
+            return CommonAssetsManager.getCosmeticAttachmentData(type, attachmentId).orElse(null);
         }
         if (type == AttachmentType.KEYCHAIN) {
-            return KeychainRegistry.get(attachmentId).map(keychain -> keychain.getAttachmentData()).orElse(null);
+            return CommonAssetsManager.getCosmeticAttachmentData(type, attachmentId).orElse(null);
         }
         return null;
     }

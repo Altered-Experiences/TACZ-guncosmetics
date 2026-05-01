@@ -6470,6 +6470,12 @@
 					"rotation": [0, 90, 0]
 				},
 				{
+					"name": "refit_skin_view",
+					"parent": "views",
+					"pivot": [30.4, 5.175, -11],
+					"rotation": [0, 90, 0]
+				},
+				{
 					"name": "refit_muzzle_view",
 					"parent": "views",
 					"pivot": [12.35, 7.85, -39.75],

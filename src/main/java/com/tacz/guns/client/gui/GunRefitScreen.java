@@ -257,7 +257,6 @@ public class GunRefitScreen extends Screen {
                 });
                 if (!button.getAttachmentItem().isEmpty()) {
                     this.addRenderableWidget(unloadButton);
-
                     if (button.getAttachmentItem().getItem() instanceof IAttachment iAttachment) {
                         TimelessAPI.getClientAttachmentIndex(iAttachment.getAttachmentId(button.getAttachmentItem()))
                                 .map(ClientAttachmentIndex::getLaserConfig)

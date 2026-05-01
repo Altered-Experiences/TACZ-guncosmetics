@@ -8,7 +8,6 @@ import com.tacz.guns.config.ServerConfig;
 import com.tacz.guns.init.*;
 import com.tacz.guns.resource.GunPackLoader;
 import com.tacz.guns.resource.modifier.AttachmentPropertyManager;
-import com.tacz.guns.cosmetic.GunCosmeticsMod;
 import net.minecraft.server.packs.PackType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -54,7 +53,6 @@ public class GunMod {
         if (ModList.get().isLoaded("kubejs")) {
             bus.register(new TimelessKubeJSPlugin());
         }
-        new GunCosmeticsMod();
 
         registerDefaultExtraGunPack();
         AttachmentPropertyManager.registerModifier();

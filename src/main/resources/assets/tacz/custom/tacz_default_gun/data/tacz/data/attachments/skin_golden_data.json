@@ -1,5 +1,13 @@
 {
   "weight": 0.0,
+  "cosmetic": {
+    "rarity": "epic",
+    "skin": {
+      "type": "specific",
+      "target_gun": "tacz:deagle",
+      "texture": "tacz:gun/uv/deagle_50_golden"
+    }
+  },
   "damage": {
     "multiplier": 1.03
   }

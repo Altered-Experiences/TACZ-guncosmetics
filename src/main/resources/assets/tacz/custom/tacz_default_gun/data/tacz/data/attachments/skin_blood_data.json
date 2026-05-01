@@ -1,3 +1,14 @@
 {
-  "weight": 0.0
+  "weight": 0.0,
+  "cosmetic": {
+    "rarity": "rare",
+    "skin": {
+      "type": "universal",
+      "overlay_texture": "tacz:attachment/uv/skin_blood",
+      "blend_mode": "multiply"
+    }
+  },
+  "damage": {
+    "multiplier": 1.01
+  }
 }

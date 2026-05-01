@@ -1,0 +1,21 @@
+{
+  "materials": [
+    {
+      "item": {
+        "tag": "forge:gems/emerald"
+      },
+      "count": 3
+    },
+    {
+      "item": {
+        "tag": "forge:leather"
+      },
+      "count": 2
+    }
+  ],
+  "result": {
+    "type": "attachment",
+    "id": "tacz:skin_emerald"
+  },
+  "type": "tacz:gun_smith_table_crafting"
+}

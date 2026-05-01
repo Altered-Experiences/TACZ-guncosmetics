@@ -1,0 +1,21 @@
+{
+  "materials": [
+    {
+      "item": {
+        "tag": "forge:ingots/gold"
+      },
+      "count": 4
+    },
+    {
+      "item": {
+        "tag": "forge:leather"
+      },
+      "count": 2
+    }
+  ],
+  "result": {
+    "type": "attachment",
+    "id": "tacz:skin_golden"
+  },
+  "type": "tacz:gun_smith_table_crafting"
+}

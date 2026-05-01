@@ -1,5 +1,12 @@
 {
   "weight": 0.05,
+  "cosmetic": {
+    "rarity": "rare",
+    "keychain": {
+      "model": "tacz:attachment/keychain_charm_geo",
+      "texture": "tacz:attachment/uv/keychain_charm"
+    }
+  },
   "ammo_speed": {
     "multiplier": 1.02
   }

@@ -1,7 +1,6 @@
 package com.tacz.guns.cosmetic.client.renderer;
 
-import com.tacz.guns.cosmetic.GunCosmeticsMod;
-import com.tacz.guns.cosmetic.client.renderer.keychain.KeychainGeoRenderCache;
+import com.tacz.guns.GunMod;
 import com.tacz.guns.cosmetic.data.SkinDefinition;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.Minecraft;
@@ -9,108 +8,24 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
-import org.lwjgl.system.MemoryUtil;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Manages dynamic registration of pack textures with Minecraft's texture manager.
- * Pack textures are not in the vanilla resource system, so we register them as
- * DynamicTexture instances at runtime.
+ * Resolves attachment skin textures through the normal TACZ/Minecraft resource system.
+ * Universal paintjobs are composed dynamically from those resources.
  */
 public final class CosmeticTextureManager {
-
-    /**
-     * Maps logical ResourceLocation (e.g. awe_example:textures/ak47_military_camo.png)
-     * to the actual registered ResourceLocation in the texture manager.
-     */
-    private static final Map<ResourceLocation, ResourceLocation> registeredTextures = new ConcurrentHashMap<>();
     private static final Map<String, ResourceLocation> paintjobTextures = new ConcurrentHashMap<>();
     private static final FileToIdConverter TEXTURE_CONVERTER = new FileToIdConverter("textures", ".png");
 
     private CosmeticTextureManager() {}
 
-    /**
-     * Register a texture from raw bytes (e.g. loaded from a pack).
-     * Returns the ResourceLocation that can be used for rendering.
-     */
-    @Nullable
-    public static ResourceLocation registerTexture(ResourceLocation logicalId, byte[] pngData) {
-        if (registeredTextures.containsKey(logicalId)) {
-            return registeredTextures.get(logicalId);
-        }
-
-        try {
-            ByteBuffer buffer = MemoryUtil.memAlloc(pngData.length);
-            NativeImage image;
-            try {
-                buffer.put(pngData);
-                buffer.flip();
-                image = NativeImage.read(buffer);
-            } finally {
-                MemoryUtil.memFree(buffer);
-            }
-            DynamicTexture dynamicTexture = new DynamicTexture(image);
-
-            // Register with a unique path to avoid collisions
-            ResourceLocation registeredId = new ResourceLocation(
-                    GunCosmeticsMod.MOD_ID,
-                    "dynamic/" + logicalId.getNamespace() + "/" + logicalId.getPath()
-            );
-
-            Minecraft.getInstance().getTextureManager().register(registeredId, dynamicTexture);
-            registeredTextures.put(logicalId, registeredId);
-
-            GunCosmeticsMod.LOGGER.debug("Registered dynamic texture: {} -> {}", logicalId, registeredId);
-            return registeredId;
-        } catch (IOException e) {
-            GunCosmeticsMod.LOGGER.error("Failed to register texture: {}", logicalId, e);
-            return null;
-        }
-    }
-
-    /**
-     * Register a texture from a file path.
-     */
-    @Nullable
-    public static ResourceLocation registerTexture(ResourceLocation logicalId, Path filePath) {
-        if (registeredTextures.containsKey(logicalId)) {
-            return registeredTextures.get(logicalId);
-        }
-
-        try {
-            byte[] data = Files.readAllBytes(filePath);
-            return registerTexture(logicalId, data);
-        } catch (IOException e) {
-            GunCosmeticsMod.LOGGER.error("Failed to read texture file: {}", filePath, e);
-            return null;
-        }
-    }
-
-    /**
-     * Get the registered rendering ResourceLocation for a logical pack texture.
-     * Returns null if the texture hasn't been registered.
-     */
-    @Nullable
-    public static ResourceLocation getRegisteredTexture(ResourceLocation logicalId) {
-        return registeredTextures.get(logicalId);
-    }
-
-    /**
-     * Resolve a texture ResourceLocation for rendering.
-     * If it's a dynamic pack texture, returns the registered version.
-     * Otherwise returns the original (for vanilla/mod textures).
-     */
     public static ResourceLocation resolveTexture(ResourceLocation logicalId) {
-        ResourceLocation registered = registeredTextures.get(logicalId);
-        return registered != null ? registered : normalizeTextureId(logicalId);
+        return normalizeTextureId(logicalId);
     }
 
     private static ResourceLocation normalizeTextureId(ResourceLocation logicalId) {
@@ -133,7 +48,7 @@ public final class CosmeticTextureManager {
         try {
             Resource resource = Minecraft.getInstance().getResourceManager().getResource(baseTexture).orElse(null);
             if (resource == null) {
-                GunCosmeticsMod.LOGGER.warn("Paintjob base texture not found: {}", baseTexture);
+                GunMod.LOGGER.warn("Paintjob base texture not found: {}", baseTexture);
                 return baseTexture;
             }
 
@@ -157,38 +72,24 @@ public final class CosmeticTextureManager {
             overlayImage.close();
 
             ResourceLocation registeredId = new ResourceLocation(
-                    GunCosmeticsMod.MOD_ID,
+                    GunMod.MOD_ID,
                     "dynamic/paintjob/" + paintjob.getSkinId().getNamespace() + "/" +
                             paintjob.getSkinId().getPath() + "/" +
                             baseTexture.getNamespace() + "/" + baseTexture.getPath()
             );
             Minecraft.getInstance().getTextureManager().register(registeredId, new DynamicTexture(result));
             paintjobTextures.put(key, registeredId);
-            GunCosmeticsMod.LOGGER.info("Registered paintjob texture: {} + {} -> {}",
+            GunMod.LOGGER.info("Registered paintjob texture: {} + {} -> {}",
                     baseTexture, paintjob.getSkinId(), registeredId);
             return registeredId;
         } catch (Exception e) {
-            GunCosmeticsMod.LOGGER.warn("Failed to compose paintjob texture: {} on {}",
+            GunMod.LOGGER.warn("Failed to compose paintjob texture: {} on {}",
                     paintjob.getSkinId(), baseTexture, e);
             return baseTexture;
         }
     }
 
-    private static NativeImage readPng(byte[] pngData) throws IOException {
-        ByteBuffer buffer = MemoryUtil.memAlloc(pngData.length);
-        try {
-            buffer.put(pngData);
-            buffer.flip();
-            return NativeImage.read(buffer);
-        } finally {
-            MemoryUtil.memFree(buffer);
-        }
-    }
-
     private static NativeImage loadOverlayImage(SkinDefinition paintjob) throws IOException {
-        if (paintjob.getTextureData() != null) {
-            return readPng(paintjob.getTextureData());
-        }
         ResourceLocation overlayTexture = resolveTexture(paintjob.getOverlayTexture());
         Resource resource = Minecraft.getInstance().getResourceManager().getResource(overlayTexture).orElse(null);
         if (resource == null) {
@@ -243,21 +144,15 @@ public final class CosmeticTextureManager {
     }
 
     /**
-     * Clear all registered dynamic textures (called on pack reload).
+     * Clear generated paintjob textures and keychain render caches.
      */
     public static void clear() {
         var textureManager = Minecraft.getInstance().getTextureManager();
-        for (ResourceLocation registeredId : registeredTextures.values()) {
-            textureManager.release(registeredId);
-        }
         for (ResourceLocation registeredId : paintjobTextures.values()) {
             textureManager.release(registeredId);
         }
-        registeredTextures.clear();
         paintjobTextures.clear();
         KeychainModelCache.clear();
-        KeychainGeoRenderCache.clear();
-        KeychainAutoAttach.clearCache();
-        GunCosmeticsMod.LOGGER.debug("Cleared all dynamic cosmetic textures");
+        GunMod.LOGGER.debug("Cleared dynamic attachment skin texture cache");
     }
 }

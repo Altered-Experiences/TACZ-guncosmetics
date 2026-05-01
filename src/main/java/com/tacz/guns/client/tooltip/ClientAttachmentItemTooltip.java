@@ -12,6 +12,7 @@ import com.tacz.guns.api.item.builder.GunItemBuilder;
 import com.tacz.guns.client.resource.ClientAssetsManager;
 import com.tacz.guns.client.resource.pojo.PackInfo;
 import com.tacz.guns.inventory.tooltip.AttachmentItemTooltip;
+import com.tacz.guns.resource.CommonAssetsManager;
 import com.tacz.guns.resource.pojo.data.attachment.AttachmentData;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -167,7 +168,8 @@ public class ClientAttachmentItemTooltip implements ClientTooltipComponent {
 
     private void addText(AttachmentType type) {
         TimelessAPI.getClientAttachmentIndex(attachmentId).ifPresent(index -> {
-            AttachmentData data = index.getData();
+            AttachmentData data = CommonAssetsManager.getCosmeticAttachmentData(type, attachmentId)
+                    .orElse(index.getData());
 
             @Nullable String tooltipKey = index.getTooltipKey();
             if (tooltipKey != null) {

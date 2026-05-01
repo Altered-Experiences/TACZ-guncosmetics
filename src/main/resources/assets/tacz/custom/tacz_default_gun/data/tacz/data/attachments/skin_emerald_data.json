@@ -1,5 +1,13 @@
 {
   "weight": 0.0,
+  "cosmetic": {
+    "rarity": "rare",
+    "skin": {
+      "type": "specific",
+      "target_gun": "tacz:deagle",
+      "texture": "tacz:gun/uv/deagle_50_emerald"
+    }
+  },
   "aim_inaccuracy": {
     "multiplier": 0.96
   }
